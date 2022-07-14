@@ -72,25 +72,28 @@ func main() {
 	fmt.Printf("GO! You have %d seconds \n", *timer)
 
 	deadline := time.NewTimer(time.Second * time.Duration(*timer))
-	go func() {
+
+loop:
+	for _, elem := range questions {
+		fmt.Printf("What is %s?: ", elem[0])
+		answerCh := make(chan string)
+		go func() {
+			var i string
+			fmt.Scanf("%s", &i)
+			answerCh <- i
+		}()
+
 		select {
 		case <-deadline.C:
 			fmt.Printf("\nOut of time! Your %d seconds timer finished.\n", *timer)
-			fmt.Printf("You've scored %d out of %d\n", correct, len(questions))
-			os.Exit(0)
+			break loop
+		default:
+			if <-answerCh == elem[1] {
+				correct++
+			}
 		}
-	}()
 
-	for _, elem := range questions {
-		var i string
-
-		fmt.Printf("What is %s?: ", elem[0])
-
-		fmt.Scanf("%s", &i)
-
-		if i == elem[1] {
-			correct++
-		}
 	}
+
 	fmt.Printf("You've scored %d out of %d\n", correct, len(questions))
 }
