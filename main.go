@@ -67,16 +67,19 @@ func main() {
 	correct := 0
 
 	var i string
-
 	fmt.Println("Press ENTER to start the timer")
 	fmt.Scanf("%s", &i)
 	fmt.Printf("GO! You have %d seconds \n", *timer)
 
-	time.AfterFunc(time.Second*time.Duration(*timer), func() {
-		fmt.Printf("\nOut of time! Your %d seconds timer finished.\n", *timer)
-		fmt.Printf("You've scored %d out of %d\n", correct, len(questions))
-		os.Exit(0)
-	})
+	deadline := time.NewTimer(time.Second * time.Duration(*timer))
+	go func() {
+		select {
+		case <-deadline.C:
+			fmt.Printf("\nOut of time! Your %d seconds timer finished.\n", *timer)
+			fmt.Printf("You've scored %d out of %d\n", correct, len(questions))
+			os.Exit(0)
+		}
+	}()
 
 	for _, elem := range questions {
 		var i string
